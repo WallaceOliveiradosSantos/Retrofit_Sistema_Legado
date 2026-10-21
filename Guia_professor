@@ -1,0 +1,28 @@
+# Guia reservado ao professor
+
+Distribua README, código, esquema, docs e exemplos ao aluno. Retire esta pasta da cópia destinada à investigação se quiser preservar a descoberta das regras. Esta base representa o domínio do WMS descrito no DSF 01; não reproduz um produto industrial real. As regras detalhadas abaixo são decisões didáticas que complementam o documento.
+
+## Regras implementadas
+
+Um lote pertence a um produto e pode identificar vários paletes. Cada palete ativo ocupa uma posição da capacidade do endereço e contém uma quantidade inteira de unidades. Transferência movimenta o palete inteiro, mantém quantidade e exige lote não vencido, destino ativo, diferente da origem e com capacidade. A validade do próprio dia é aceita. Baixa exige supervisor e motivo, permite lote vencido, zera saldo e inativa o palete. Não há transferência nem nova baixa de palete baixado. Movimentação e atualização de estoque pertencem à mesma transação. A identidade responsável vem da sessão, nunca de um ID enviado pelo cliente.
+
+Reenvio com a mesma chave, operador e corpo retorna o registro anterior sem reaplicar. Corpo divergente com mesma chave é rejeitado. Há bloqueios de operador, palete e destino; o banco pode detectar deadlock em concorrência e o contrato solicita reenvio. A consulta de histórico limita a visibilidade conforme perfil.
+
+## Base inicial e roteiro
+
+`A-01-01` começa lotado com PAL-001 e PAL-003. `A-01-02` começa vazio com capacidade dois. `B-01-01` começa lotado com PAL-002. `B-01-02` está inativo. PAL-001 e PAL-002 pertencem ao mesmo lote válido; PAL-003 pertence ao lote vencido. Datas são relativas à reinicialização.
+
+Valide login inválido, consulta inexistente, transferência válida, mesma origem, endereço lotado e inativo, lote vencido, baixa sem permissão, baixa autorizada, operação sobre baixado, repetição da chave e conflito de corpo. Confirme que erros não alteram estoque nem geram movimento. Para testar disputa de capacidade, envie duas operações simultâneas de operadores diferentes para a última vaga e verifique que a ocupação não excede o limite. Esse cenário requer preparar registros adicionais na base de teste. Não foi automatizado no teste de integração fornecido.
+
+`npm test` cobre regras isoladas e proteção de PIN. `npm run test:integration` cobre o fluxo HTTP transacional com MySQL real e altera a base; reinicialize antes. A validação concorrente e falhas reais de rede permanecem como ensaios de laboratório. O ganho de 50% deve ser medido pelo aluno; não é uma propriedade comprovada deste back-end.
+
+## Avaliação sugerida
+
+| Evidência | Peso |
+| --- | --- |
+| Compreensão do processo e regras | 25% |
+| Integração preservando contrato e integridade | 30% |
+| Ergonomia, QR e tratamento de erros | 25% |
+| Testes, medidas e comunicação da equipe | 20% |
+
+Não forneça o adaptador pronto. Peça que cada equipe explique o que fica na interface e o que precisa ser garantido pelo servidor. Discuta por que QR não substitui consulta de estado e por que uma fila offline não pode assumir sucesso antes da confirmação. A implantação industrial, política corporativa de identidade, HTTPS e redundância exigem um projeto adicional.
